@@ -9,7 +9,7 @@ import BottomBar from '@/components/shared/BottomBar'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata = {
+export const metadata:Metadata = {
   title:'Threads',
   description:'Next.js Meta Threads Application'
 }
@@ -24,7 +24,7 @@ export default function RootLayout({
       <html lang="en">
       <body className={inter.className}>
         <TopBar/>
-        <main>
+        <main className='flex flex-row'>
           <LeftsideBar/>
             <section className="main-container">
               <div className='w-full max-w-4xl' >
@@ -33,7 +33,6 @@ export default function RootLayout({
             </section>
           <RightSideBar/>
         </main>
-        
         <BottomBar/>
         </body>
     </html>
