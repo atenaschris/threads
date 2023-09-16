@@ -15,40 +15,65 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import Image from 'next/image';
-import { ChangeEvent } from 'react';
+import { Textarea } from "@/components/ui/textarea"
 
-type AccountProfileUser = Pick<User,'id'|'username'|'firstName'|'imageUrl'> & {
-    objectId?:string;
-    bio?:string
-}
+import Image from 'next/image';
+import { ChangeEvent, useState } from 'react';
+
+
 
 interface AccountProfileProps {
-    user: AccountProfileUser ;
+    user: {
+      id?:string,
+      objectId:string,
+      username:string,
+      name:string,
+      bio:string,
+      image: string ;
+    } 
     btnTitle:string;
 }
 
 const AccountProfile = ({user,btnTitle}:AccountProfileProps) => {
-
-    function onSubmit(values: z.infer<typeof UserValidation>) {
-        // Do something with the form values.
-        // ✅ This will be type-safe and validated.
-        console.log(values)
-      }
+    const [files,setfiles] = useState<File[]>([])
     
-  const handleImage = (onChange: (...event: any[]) => void) => (e:ChangeEvent) => {
+  const handleImage = (fieldChange: (value: string) => void) => (e:ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
+  
+    const fileReader = new FileReader();
+
+    if(e.target.files && e.target.files.length > 0){
+      const file = e.target.files[0];
+
+      setfiles(Array.from(e.target.files));
+      if(!file.type.includes('image')) return
+
+      fileReader.onload = async (event) => {
+        const imageDataUrl = event.target?.result?.toString() ?? '';
+        fieldChange(imageDataUrl)
+      }
+
+      fileReader.readAsDataURL(file)
+    }
+
   }
 
     const form = useForm<z.infer<typeof UserValidation>>({
         resolver: zodResolver(UserValidation),
         defaultValues:{
-            profile_photo:'',
-            name:'',
-            username:'',
-            bio:''
+            profile_photo: user?.image ?? '',
+            name: user?.name ?? '',
+            username: user?.username ?? '',
+            bio: user?.bio ?? ''
         }
     });
+
+    const onSubmit = (values: z.infer<typeof UserValidation>) => {
+      // Do something with the form values.
+      // ✅ This will be type-safe and validated.
+      console.log(values)
+    }
+
     return (
         <Form {...form}>
         <form 
@@ -64,9 +89,13 @@ const AccountProfile = ({user,btnTitle}:AccountProfileProps) => {
                         <Image 
                             src={field.value} 
                             alt='profile photo' 
-                            width={96} height={96} 
+                            width={96} 
+                            height={96} 
                             priority 
                             className='rounded-full object-contain'
+                            style={{
+                              height:'inherit'
+                            }}
                         />
                     ) : (
                         <Image 
@@ -88,7 +117,63 @@ const AccountProfile = ({user,btnTitle}:AccountProfileProps) => {
                     onChange={handleImage(field.onChange)}
                      />
                 </FormControl>
-                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem className='flex flex-col gap-3 w-full'>
+                <FormLabel className='text-base-semibold text-light-2'>
+                    Name
+                </FormLabel>
+                <FormControl>
+                  <Input 
+                    type='text' 
+                    placeholder='Write a Title' 
+                    className='account-form_input no-focus'
+                    {...field}
+                     />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem className='flex flex-col gap-3 w-full'>
+                <FormLabel className='text-base-semibold text-light-2'>
+                    Username
+                </FormLabel>
+                <FormControl >
+                  <Input 
+                    type='text' 
+                    placeholder='Write a Title' 
+                    className='account-form_input no-focus'
+                    {...field}
+                     />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="bio"
+            render={({ field }) => (
+              <FormItem className='flex flex-col gap-3 w-full'>
+                <FormLabel className='text-base-semibold text-light-2'>
+                    Bio
+                </FormLabel>
+                <FormControl>
+                  <Textarea 
+                    rows={10} 
+                    placeholder='Write some bio' 
+                    className='account-form_input no-focus'
+                    {...field}
+                     />
+                </FormControl>
               </FormItem>
             )}
           />

@@ -17,7 +17,7 @@ function BottomBar (){
             return (
             <Link href={link.route} key={link.label} className={`bottombar_link ${isActive ? 'bg-primary-500' : ''}`}>
                 <Image src={link.imgURL} alt={link.label} width={24} height={24}/>
-                <p className='text-light-1 text-subtle-medium max-sm:hidden' >{link.label}</p>
+                <p className='text-light-1 text-subtle-medium max-sm:hidden text-center' >{link.label}</p>
             </Link>
 )
 } )}
