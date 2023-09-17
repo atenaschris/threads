@@ -1,19 +1,26 @@
 import AccountProfile from "@/components/forms/AccountProfile"
+import { getCurrentUser } from "@/lib/actions/user.actions";
+import { IUser } from "@/lib/models/user.model";
 
 import { currentUser } from "@clerk/nextjs/server"
 
 async function Page (){
     const user = await currentUser();
+    let userInfo = {} as IUser;
+    if(user){
+        userInfo = await getCurrentUser(user.id);
+    }
 
-    const userInfo = {}
-
-    const userData = {
-        id:user?.id,
-        objectId:userInfo?._id,
-        username:userInfo?.username || user?.username,
-        name:userInfo?.name || user?.firstName,
-        bio:userInfo?.bio || "",
-        image: userInfo?.image || user?.imageUrl
+    
+    const userData:IUser = {
+        id:user?.id ?? '',
+        _id:userInfo?._id ?? '',
+        username:userInfo?.username ?? user?.username,
+        name:userInfo?.name ?? user?.firstName,
+        bio:userInfo?.bio ?? "",
+        image: userInfo?.image ?? user?.imageUrl,
+        onBoarded:userInfo?.onBoarded ?? false
+        
     }
     
     return (

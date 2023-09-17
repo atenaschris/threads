@@ -24,19 +24,13 @@ import {useUploadThing} from'@/lib/uploadthing'
 import { updateUser } from '@/lib/actions/user.actions';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
+import { IUser } from '@/lib/models/user.model';
 
 
 
 interface AccountProfileProps {
-    user: {
-      id:string,
-      objectId:string,
-      username:string,
-      name:string,
-      bio:string,
-      image: string ;
-    } 
-    btnTitle:string;
+    user: IUser;
+    btnTitle?:string;
 }
 
 const AccountProfile = ({user,btnTitle}:AccountProfileProps) => {
@@ -90,34 +84,39 @@ const AccountProfile = ({user,btnTitle}:AccountProfileProps) => {
     });
 
     const onSubmit =  async (values: z.infer<typeof UserValidation>) => {
-      const blob = values.profile_photo;
-
-      const hasImageChanged = isBase64Image(blob);
-
-      if(hasImageChanged){
-
-        const imgRes =  await startUpload(files)
-
-        if(imgRes && imgRes[0].fileUrl){
-          values.profile_photo = imgRes[0].fileUrl
+      try {
+        const blob = values.profile_photo;
+    
+        const hasImageChanged = isBase64Image(blob);
+    
+        if (hasImageChanged) {
+          const imgRes = await startUpload(files);
+    
+          if (imgRes && imgRes[0].fileUrl) {
+            values.profile_photo = imgRes[0].fileUrl;
+          }
         }
-
-      }
-
-      // TODO: Call a backend function to update the user in the db
-      await updateUser({
-        userId:user.id,
-        username:values.username,
-        name:values.name,
-        bio:values.bio,
-        image:values.profile_photo,
-        path:pathname
-      })
-
-      if(pathname === '/profile/edit'){
-        router.back()
-      } else {
-        router.push('/');
+    
+        // TODO: Call a backend function to update the user in the db
+        await updateUser({
+          userId: user.id,
+          username: values.username,
+          name: values.name,
+          bio: values.bio,
+          image: values.profile_photo,
+          path: pathname,
+        });
+    
+        if (pathname === '/profile/edit') {
+          router.back();
+        } else {
+          router.push('/');
+        }
+      } catch (error) {
+        // Handle the error here, you can log it or display a user-friendly message
+        console.error("An error occurred:", error);
+        // You might also want to display a user-friendly error message
+        // For example: setErrorState("An error occurred while submitting the form");
       }
 
     }
@@ -165,6 +164,7 @@ const AccountProfile = ({user,btnTitle}:AccountProfileProps) => {
                     onChange={handleImage(field.onChange)}
                      />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -184,6 +184,7 @@ const AccountProfile = ({user,btnTitle}:AccountProfileProps) => {
                     {...field}
                      />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -203,6 +204,7 @@ const AccountProfile = ({user,btnTitle}:AccountProfileProps) => {
                     {...field}
                      />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -222,6 +224,7 @@ const AccountProfile = ({user,btnTitle}:AccountProfileProps) => {
                     {...field}
                      />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />

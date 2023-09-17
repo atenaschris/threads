@@ -1,13 +1,25 @@
-import mongoose  from "mongoose";
+import mongoose, {Schema,  InferSchemaType }  from "mongoose";
 
-const userSchema = new mongoose.Schema({
+export interface IUser {
+    id:string;
+    _id:string;
+    username: string;
+    name: string;
+    image: string;
+    bio:string;
+    threads?:any[];
+    onBoarded:boolean;
+    communities?:any[]
+  }
+
+const userSchema = new Schema({
     id:{type:String,required:true},
     username:{type:String, unique:true},
     name:{type:String,required:true},
     image:String,
     bio:String,
     threads:[{
-        type:mongoose.Schema.Types.ObjectId,
+        type:Schema.Types.ObjectId,
         ref:'Thread'
     }],
     onBoarded:{
@@ -15,12 +27,14 @@ const userSchema = new mongoose.Schema({
         default:false
     },
     communities:[{ 
-        type:mongoose.Schema.Types.ObjectId,
+        type:Schema.Types.ObjectId,
         ref:'Community'
     }],
 })
 
+type User = InferSchemaType<typeof userSchema>;
 
-const User = mongoose.models.User || mongoose.model('User',userSchema)
 
-export default User
+const UserModel = mongoose.models.User<User> || mongoose.model<User>('User',userSchema)
+
+export default UserModel

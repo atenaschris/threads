@@ -1,7 +1,7 @@
 "use server"
 
 import { revalidatePath } from 'next/cache';
-import User from '../models/user.model';
+import UserModel, { IUser } from '../models/user.model';
 import {connectToDB} from '../mongoose';
 
 interface UpdateUserParams{
@@ -14,16 +14,20 @@ interface UpdateUserParams{
 }
 
 export async function updateUser ({userId,username,name,bio,image,path}:UpdateUserParams):Promise<void>{
-    connectToDB();
+    
     try{
-        await User.findOneAndUpdate(
+        if (!userId || !username || !name || !bio || !image || !path) {
+            throw new Error("Missing required parameters");
+        }
+        connectToDB();
+        await UserModel.findOneAndUpdate(
             {id:userId},
             {
             username:username.toLowerCase(),
             name,
             bio,
             image,
-            onboarded: true
+            onBoarded: true
             },
             {upsert:true}
         )
@@ -33,5 +37,21 @@ export async function updateUser ({userId,username,name,bio,image,path}:UpdateUs
         }
     } catch(err:any){
         throw new Error(`Failed to create/update user: ${err.message}`)
+    }
+}
+
+export async function getCurrentUser (userId:string):Promise<IUser>{
+    
+    try{
+        connectToDB();
+        const user = await UserModel.findOne({id:userId})
+        if(!user){
+            throw new Error('User not found with id:'+ userId)
+        }
+
+    return user;
+
+    } catch(err:any){
+        throw new Error(err.message)
     }
 }
