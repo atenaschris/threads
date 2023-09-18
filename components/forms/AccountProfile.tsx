@@ -113,10 +113,7 @@ const AccountProfile = ({user,btnTitle}:AccountProfileProps) => {
           router.push('/');
         }
       } catch (error) {
-        // Handle the error here, you can log it or display a user-friendly message
         console.error("An error occurred:", error);
-        // You might also want to display a user-friendly error message
-        // For example: setErrorState("An error occurred while submitting the form");
       }
 
     }

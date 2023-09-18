@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
 import { ThreadValidation } from '@/lib/validations/thread';
 import { Input } from '../ui/input';
+import { createThread } from '@/lib/actions/thread.actions';
 /* import { IUser } from '@/lib/models/user.model'; */
 
 /* import { updateUser } from '@/lib/actions/user.actions';
@@ -38,10 +39,22 @@ const PostThread = ({userId}:{userId:string}) => {
         }
     });
 
-    const onSubmit =  async (values: z.infer<typeof ThreadValidation>) => {
-        
+    const onSubmit = async (values: z.infer<typeof ThreadValidation>) => {
+        try{
+          await createThread({
+            text:values.thread,
+            author:userId,
+            communityId:null,
+            path:pathname
+          })
   
-      }
+          router.push('/')
+          
+        } catch(err:any){
+          console.log(err.message)
+        }
+       
+    }
   
     return (
         <Form {...form}>
