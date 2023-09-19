@@ -1,7 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache";
-import ThreadModel from "../models/thread.model";
+import ThreadModel, { Thread } from "../models/thread.model";
 import UserModel from "../models/user.model";
 import { connectToDB } from "../mongoose";
 
@@ -10,6 +10,27 @@ interface CreateThreadParams{
     author:string;
     communityId:string | null;
     path:string;
+}
+
+export async function fetchThreads(pageNumber = 1, pageSize = 20){
+    try{
+        connectToDB();
+        const skipAmount = (pageNumber - 1) * pageSize
+        const threadsQuery = ThreadModel.find({parentId:{$in:[null,undefined]}})
+        .sort({createdAt:'desc'})
+        .skip(skipAmount)
+        .limit(pageSize)
+        .populate({path:'author', model:UserModel})
+        .populate({path:'children', populate:{path:'author',model:UserModel,select:"_id name parentId image"}})
+
+        const totalThreadsCount = await ThreadModel.countDocuments({parentId:{$in:[null,undefined]}})
+        const threads = await threadsQuery.exec()
+        const isNext = totalThreadsCount > skipAmount + threads.length
+
+        return {threads, isNext}
+    } catch(err:any){
+        throw new Error(`Error creating thread: ${err.message}`)
+    }
 }
 
 
