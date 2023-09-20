@@ -5,7 +5,7 @@ import { threadId } from "worker_threads";
 interface ThreadCardProps{
     id:string;
     currentUserId:string;
-    parentId:string | null;
+    parentId:string | undefined;
     content:string;
     author:{
         name:string,
@@ -16,7 +16,7 @@ interface ThreadCardProps{
         id:string,
         name:string,
         image:string
-    } | null,
+    } | undefined,
     createdAt:string,
     comments:{
         author:{

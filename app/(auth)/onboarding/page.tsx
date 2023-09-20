@@ -1,18 +1,18 @@
 import AccountProfile from "@/components/forms/AccountProfile"
 import { getCurrentUser } from "@/lib/actions/user.actions";
-import { IUser } from "@/lib/models/user.model";
+import { User } from "@/lib/models/user.model";
 
 import { currentUser } from "@clerk/nextjs/server"
 
 async function Page (){
     const user = await currentUser();
-    let userInfo = {} as IUser;
+    let userInfo = {} as User;
     if(user){
         userInfo = await getCurrentUser(user.id);
     }
 
     
-    const userData:IUser = {
+    const userData:Exclude<User,'threads' |'communities'> = {
         id:user?.id ?? '',
         _id:userInfo?._id ?? '',
         username:userInfo?.username ?? user?.username,

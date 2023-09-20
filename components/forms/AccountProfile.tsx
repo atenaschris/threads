@@ -24,12 +24,12 @@ import {useUploadThing} from'@/lib/uploadthing'
 import { updateUser } from '@/lib/actions/user.actions';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
-import { IUser } from '@/lib/models/user.model';
+import { User as MongoUser } from '@/lib/models/user.model';
 
 
 
 interface AccountProfileProps {
-    user: IUser;
+    user: MongoUser;
     btnTitle?:string;
 }
 

@@ -1,7 +1,7 @@
 "use server"
 
 import { revalidatePath } from 'next/cache';
-import UserModel, { IUser } from '../models/user.model';
+import UserModel, { User } from '../models/user.model';
 import {connectToDB} from '../mongoose';
 
 interface UpdateUserParams{
@@ -40,11 +40,11 @@ export async function updateUser ({userId,username,name,bio,image,path}:UpdateUs
     }
 }
 
-export async function getCurrentUser (userId:string):Promise<IUser>{
+export async function getCurrentUser (userId:string):Promise<User>{
     
     try{
         connectToDB();
-        const user = await UserModel.findOne({id:userId})
+        const user = await UserModel.findOne({id:userId}) as User
         if(!user){
             throw new Error('User not found with id:'+ userId)
         }

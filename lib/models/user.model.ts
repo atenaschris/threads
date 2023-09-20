@@ -1,16 +1,5 @@
 import mongoose, {Schema,  InferSchemaType }  from "mongoose";
 
-export interface IUser {
-    id:string;
-    _id:string;
-    username: string;
-    name: string;
-    image: string;
-    bio:string;
-    threads?:any[];
-    onBoarded:boolean;
-    communities?:any[]
-  }
 
 const userSchema = new Schema({
     id:{type:String,required:true},
@@ -32,9 +21,9 @@ const userSchema = new Schema({
     }],
 })
 
-type User = InferSchemaType<typeof userSchema>;
+export type User = InferSchemaType<typeof userSchema> & {_id:string};
 
 
-const UserModel = mongoose.models.User<User> || mongoose.model<User>('User',userSchema)
+const UserModel = mongoose.models.User || mongoose.model<User>('User',userSchema)
 
 export default UserModel

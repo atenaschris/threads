@@ -53,3 +53,41 @@ export async function createThread({text,author,communityId,path}:CreateThreadPa
         throw new Error(`Error creatign thread: ${err.message}`)
     }
 }
+
+export async function fetchThreadById(threadId:string):Promise<Thread>{
+    connectToDB();
+    try {
+
+        //TODO: Populate community, later
+        const threadQuery = await ThreadModel.findById(threadId)
+        .populate({
+            path:'author',
+            model:UserModel,
+            select:" _id id name image"
+        })
+        .populate({
+            path:'children',
+            populate:[
+                {
+                    path:'author',
+                    model:UserModel,
+                    select:"_id id name parentId image"
+                },
+                {
+                    path:'children',
+                    model:ThreadModel,
+                    populate: {
+                        path:'author',
+                        model:UserModel,
+                        select:"_id id name parentId image"
+                    }
+                }
+            ]
+        }).exec()
+
+        return threadQuery
+
+    } catch (error:any) {
+        throw new Error(`Error Fetching Thread: ${error.message}`)
+    }
+}
