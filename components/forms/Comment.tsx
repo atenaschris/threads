@@ -67,13 +67,14 @@ const Comment = ({threadId,currentDbSavedUserImg,currentUserId}:CommentProps) =>
             render={({ field }) => (
               <FormItem className='flex items-center gap-3 w-full'>
                 <FormLabel className='text-base-semibold text-light-2'>
-                    <Image 
-                        src={currentDbSavedUserImg} 
-                        alt="Profile Image" 
-                        width={48} 
-                        height={48}
-                        className='rounded-full object-cover'
-                    />
+                <div className="relative h-11 w-11 object-cover">
+                  <Image 
+                      src={currentDbSavedUserImg} 
+                      alt="Profile Image" 
+                      fill
+                      className='rounded-full object-cover'
+                  />
+                </div>
                 </FormLabel>
                 <FormControl className='border-none bg-transparent'>
                   <Input 
