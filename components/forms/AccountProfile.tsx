@@ -25,11 +25,12 @@ import { updateUser } from '@/lib/actions/user.actions';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
 import { User as MongoUser } from '@/lib/models/user.model';
+import { AccountProfileUserProps } from '@/app/(auth)/onboarding/page';
 
 
 
 interface AccountProfileProps {
-    user: MongoUser;
+    user: AccountProfileUserProps;
     btnTitle?:string;
 }
 

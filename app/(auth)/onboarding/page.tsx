@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/actions/user.actions";
 import { User } from "@/lib/models/user.model";
 
 import { currentUser } from "@clerk/nextjs/server"
+export type AccountProfileUserProps = Omit<User,'threads' |'communities'>
 
 async function Page (){
     const user = await currentUser();
@@ -10,12 +11,12 @@ async function Page (){
     if(user){
         userInfo = await getCurrentUser(user.id);
     }
-
     
-    const userData:Exclude<User,'threads' |'communities'> = {
+    
+    const userData:AccountProfileUserProps = {
         id:user?.id ?? '',
         _id:userInfo?._id ?? '',
-        username:userInfo?.username ?? user?.username,
+        username:userInfo?.username ?? user?.username!,
         name:userInfo?.name ?? user?.firstName,
         bio:userInfo?.bio ?? "",
         image: userInfo?.image ?? user?.imageUrl,

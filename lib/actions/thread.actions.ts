@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import ThreadModel, { Thread } from "../models/thread.model";
 import UserModel from "../models/user.model";
 import { connectToDB } from "../mongoose";
+import { threadId } from "worker_threads";
 
 interface CreateThreadParams{
     text:string,
@@ -89,5 +90,44 @@ export async function fetchThreadById(threadId:string):Promise<Thread>{
 
     } catch (error:any) {
         throw new Error(`Error Fetching Thread: ${error.message}`)
+    }
+}
+
+export async function addCommentToThread(
+    parentThreadId:string,
+    commentText:string,
+    commentCreatorCurrentAuthUserId:string,
+    path:string
+){
+    try {
+        connectToDB()
+        // Find the thread which we want to comment on
+        const parentThread = await ThreadModel.findById(parentThreadId)
+      
+        if(!parentThread) throw new Error(`Thread not found...`)
+
+        // We have to create a new thread attaching the commentText
+        const commentParentThread = await new ThreadModel({
+            text:commentText,
+            author:commentCreatorCurrentAuthUserId,
+            parentId:parentThreadId
+        });
+
+        // We have to save this new comment in the DB
+        await commentParentThread.save();
+
+        // Update the original thread to include the newly added comment
+        parentThread.children.push(commentParentThread._id);
+
+        // Save the parentThread to the Db to migrate the newly added chilren comment
+        await parentThread.save()
+
+        console.log(commentParentThread)
+        console.log(parentThread)
+
+        // Revalidate the path in order to invalidate the cache
+        revalidatePath(path)
+    } catch (error) {
+        throw new Error(`Failed to add comment to Thread: ${parentThreadId} with the text: ${commentText}`)
     }
 }
