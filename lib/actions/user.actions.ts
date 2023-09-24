@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import UserModel, { User } from '../models/user.model';
 import {connectToDB} from '../mongoose';
+import ThreadModel from '../models/thread.model';
 
 interface UpdateUserParams{
     userId:string,
@@ -44,14 +45,33 @@ export async function getCurrentUser (userId:string):Promise<User>{
     
     try{
         connectToDB();
-        const user = await UserModel.findOne({id:userId}) as User
-        if(!user){
-            throw new Error('User not found with id:'+ userId)
-        }
-
-    return user;
+        return await UserModel.findOne({id:userId}) as User
 
     } catch(err:any){
         throw new Error(err.message)
     }
+}
+
+export async function fetchUserThreadsByAccountUserId(accountUserId:string){
+try {
+    connectToDB();
+    // TODO: Populate Community
+    const accountUserThreads = await UserModel.findOne({id:accountUserId})
+    .populate({path:'threads',model:ThreadModel,populate:{
+        path:'children',
+        model:ThreadModel,
+        populate:{
+            path:'author',
+            model:UserModel,
+            select:'name image id'
+        }
+    }})
+
+    return accountUserThreads
+
+} catch (error:any) {
+    throw new Error(`Failed to fetch user threads: ${error.message}`)
+}
+
+
 }
