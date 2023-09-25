@@ -1,11 +1,10 @@
 "use server"
 
 import { revalidatePath } from 'next/cache';
-import UserModel from '../models/user.model';
+import UserModel, { User } from '../models/user.model';
 import {connectToDB} from '../mongoose';
 import ThreadModel from '../models/thread.model';
 import { FilterQuery, SortOrder } from 'mongoose';
-import { User } from '@clerk/nextjs/server';
 
 interface UpdateUserParams{
     userId:string,
@@ -112,12 +111,12 @@ export async function fetchFilterUsers({
 
         const sortOptions = {createdAt:sortBy}
 
-        const totalUsersCount = await UserModel.countDocuments(usersFilteredQuery);
-
         const filteredUsers = await UserModel.find(usersFilteredQuery)
         .sort(sortOptions)
         .skip(skipAmount)
         .limit(pageSize);
+
+        const totalUsersCount = await UserModel.countDocuments(usersFilteredQuery);
 
         const isNext = totalUsersCount > skipAmount + filteredUsers.length;
 
@@ -125,5 +124,35 @@ export async function fetchFilterUsers({
 
     } catch (error:any) {
         throw new Error(`Failed to fetch Users`)
+    }
+}
+
+
+export async function getUserActivity(userId:string){
+    try {
+        connectToDB();
+
+        //find all threads created by the user
+        const userThreads = await ThreadModel.find({author:userId})
+        console.log({userThreads})
+        // collect all the child thread ids (replies) from the 'children' field
+        const childThreadsIds = userThreads.reduce((acc,userThread) => acc.concat(userThread.children),[])
+        console.log({childThreadsIds})
+        // find all the replies (all the comment of other users to our threads, excluded the one by ourself)
+        const replies = await ThreadModel.find({
+            _id:{$in: childThreadsIds},
+            author:{$ne:userId}
+        }).populate({
+            path:'author',
+            model:UserModel,
+            select:'name image _id'
+        })
+
+        console.log({replies})
+
+        return replies
+
+    } catch (error:any) {
+        throw new Error(error.message)
     }
 }
