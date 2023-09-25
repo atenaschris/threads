@@ -1,9 +1,11 @@
 "use server"
 
 import { revalidatePath } from 'next/cache';
-import UserModel, { User } from '../models/user.model';
+import UserModel from '../models/user.model';
 import {connectToDB} from '../mongoose';
 import ThreadModel from '../models/thread.model';
+import { FilterQuery, SortOrder } from 'mongoose';
+import { User } from '@clerk/nextjs/server';
 
 interface UpdateUserParams{
     userId:string,
@@ -74,4 +76,54 @@ try {
 }
 
 
+}
+
+
+export async function fetchFilterUsers({
+    userId,
+    searchString = '',
+    pageNumber = 1,
+    pageSize = 20,
+    sortBy="desc"
+}:{
+    userId:string,
+    searchString?:string;
+    pageNumber?:number;
+    pageSize?:number;
+    sortBy?:SortOrder
+}){
+    try {
+        connectToDB();
+
+        const skipAmount = (pageNumber - 1) * pageSize;
+
+        const regex = new RegExp(searchString,"i")
+
+        const usersFilteredQuery:FilterQuery<typeof UserModel> = {
+            id:{ $ne:userId}
+        }
+
+        if(searchString.trim() !== ''){
+            usersFilteredQuery.$or = [
+                {username:{$regex:regex}},
+                {name:{$regex:regex}}
+            ]
+        }
+
+        const sortOptions = {createdAt:sortBy}
+
+        const totalUsersCount = await UserModel.countDocuments(usersFilteredQuery);
+
+        const filteredUsers = await UserModel.find(usersFilteredQuery)
+        .sort(sortOptions)
+        .skip(skipAmount)
+        .limit(pageSize);
+
+        const isNext = totalUsersCount > skipAmount + filteredUsers.length;
+
+        return {filteredUsers,isNext}
+
+    } catch (error:any) {
+        throw new Error(`Failed to fetch Users`)
+    }
 }
