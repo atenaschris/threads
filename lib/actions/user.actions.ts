@@ -5,6 +5,7 @@ import UserModel, { User } from '../models/user.model';
 import {connectToDB} from '../mongoose';
 import ThreadModel from '../models/thread.model';
 import { FilterQuery, SortOrder } from 'mongoose';
+import CommunityModel from '../models/community.model';
 
 interface UpdateUserParams{
     userId:string,
@@ -13,6 +14,20 @@ interface UpdateUserParams{
     bio:string,
     image:string,
     path:string
+}
+
+export async function getCurrentUser (userId:string):Promise<void>{
+    
+    try{
+        connectToDB();
+        return await UserModel.findOne({id:userId}).populate({
+            path: "communities",
+            model: CommunityModel,
+          });
+
+    } catch(err:any){
+        throw new Error(err.message)
+    }
 }
 
 export async function updateUser ({userId,username,name,bio,image,path}:UpdateUserParams):Promise<void>{
@@ -39,17 +54,6 @@ export async function updateUser ({userId,username,name,bio,image,path}:UpdateUs
         }
     } catch(err:any){
         throw new Error(`Failed to create/update user: ${err.message}`)
-    }
-}
-
-export async function getCurrentUser (userId:string):Promise<User>{
-    
-    try{
-        connectToDB();
-        return await UserModel.findOne({id:userId}) as User
-
-    } catch(err:any){
-        throw new Error(err.message)
     }
 }
 
