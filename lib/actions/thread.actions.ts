@@ -51,16 +51,21 @@ export async function fetchThreads(pageNumber = 1, pageSize = 20){
 export async function createThread({text,author,communityId,path}:CreateThreadParams){
     try{
         connectToDB();
+        
         const communityIdObject = await CommunityModel.findOne(
             { id: communityId },
             { _id: 1 }
           );
 
+          console.log({communityIdObject})
+
         const newThread = await ThreadModel.create({
            text,
            author,
-           community:communityId, 
+           community:communityIdObject, 
         });
+
+        console.log({newThread})
 
         await UserModel.findByIdAndUpdate(author,{
             $push:{threads:newThread._id}
