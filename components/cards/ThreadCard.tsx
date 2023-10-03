@@ -39,7 +39,7 @@ const ThreadCard = ({
     isComment
 } : ThreadCardProps) => {
     return (
-        <article className={`flex w-full rounded-xl ${isComment ?  'px-0 xs:px-7' : 'bg-dark-2 p-7'}`}>
+        <article className={`flex flex-col w-full rounded-xl ${isComment ?  'px-0 xs:px-7' : 'bg-dark-2 p-7'}`}>
             <div className="flex w-full flex-1 flex-row gap-4" >
                 <div className="flex flex-col items-center">
                     <Link href={`/profile/${author.id}`} className="relative w-11 h-11">
@@ -79,12 +79,11 @@ const ThreadCard = ({
             </div>  
             {/*TODO: DELETE Thread */}
             {/*TODO: Show comment logos */}
-
             {!isComment && community && (
                 <Link href={`/communities/${community.id}`} className="mt-5 flex items-center">
                     <p className="text-subtle-medium text-gray-1">
                         {formatDateString(createdAt)}
-                        - {community.name} Community
+                        {" "}- {community.name} Community
                     </p>
                     <Image
                         src={community.image}
@@ -95,6 +94,7 @@ const ThreadCard = ({
                     />
                 </Link>
             )}
+            
         </article>
     )
 }
